@@ -58,7 +58,7 @@ func main() {
 			KeepAlive: 30 * time.Second,
 			DualStack: true,
 		}).DialContext,
-		ForceAttemptHTTP2:     true,
+		ForceAttemptHTTP2:     false,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
@@ -67,10 +67,13 @@ func main() {
 	}
 
 	director := func(req *http.Request) {
-		// req.Header.Add("X-Forwarded-Host", req.Host)
-		// req.Header.Add("X-Origin-Host", origin.Host)
+		if verbose {
+			mlog("[HS] %s > %s%s", req.RemoteAddr, origin.Host, req.URL.String())
+		}
+
 		req.URL.Scheme = "https"
 		req.URL.Host = origin.Host
+		req.Host = origin.Host
 	}
 
 	reverseProxy := &httputil.ReverseProxy{
@@ -78,19 +81,19 @@ func main() {
 		Director:  director,
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		reverseProxy.ServeHTTP(w, r)
-	})
-
 	mlog("Listening on %s", port)
 	mlog("Upstream proxy: %s", proxy)
 	mlog("Forwarding to: %s", dest)
 
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		reverseProxy.ServeHTTP(w, r)
+	})
+
 	log.Fatal(http.ListenAndServe(port, nil))
 }
 
-func mlog(line, f string) {
+func mlog(line string, f ...interface{}) {
 	if verbose {
-		log.Printf(line, f)
+		log.Printf(line, f...)
 	}
 }
