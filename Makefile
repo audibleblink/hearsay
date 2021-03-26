@@ -5,18 +5,15 @@ PROXY ?= http://localhost:8181
 PORT ?= 8080
 DEST ?= https://example.com
 
-BUILD=go build -trimpath
-STRIP=-s -w -buildid=
-LD.windows=-ldflags "${STRIP} -X main.port=${PORT} -X main.dest=${DEST} -X main.proxy=${PROXY} -H windowsgui"
-LD.linux=-ldflags "${STRIP} -X main.port=${PORT} -X main.dest=${DEST} -X main.proxy=${PROXY}"
-LD.darwin=${LD.linux}
+GARBLE=${GOPATH}/bin/garble
+BUILD=garble -tiny build
 
 PLATFORMS=windows linux darwin
 OS=$(word 1, $@)
 
 all: ${PLATFORMS}
 
-${PLATFORMS}:
+${PLATFORMS}: $(GARBLE)
 	GOOS=${OS} ${BUILD} ${LD.${OS}} -o ${OUT}/${APP}_${OS}
 
 release: all
@@ -25,3 +22,6 @@ release: all
 
 clean:
 	rm -rf ${OUT} ${APP}*
+
+$(GARBLE):
+	go get mvdan.cc/garble
