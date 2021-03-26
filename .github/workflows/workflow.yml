@@ -17,7 +17,7 @@ jobs:
       - name: Build
         uses: audibleblink/golang-action@1.5.4
         with:
-          args: make release
+          args: make -j3 release
 
       - name: Get the version
         id: get_version
