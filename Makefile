@@ -24,4 +24,4 @@ clean:
 	rm -rf ${OUT} ${APP}*
 
 $(GARBLE):
-	go get mvdan.cc/garble
+	go install mvdan.cc/garble@latest
