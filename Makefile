@@ -8,6 +8,10 @@ DEST ?= https://example.com
 GARBLE=${GOPATH}/bin/garble
 BUILD=garble -tiny build
 
+LD.windows=-ldflags "${STRIP} -X main.port=${PORT} -X main.dest=${DEST} -X main.proxy=${PROXY} -H windowsgui"
+LD.linux=-ldflags "${STRIP} -X main.port=${PORT} -X main.dest=${DEST} -X main.proxy=${PROXY}"
+LD.darwin=${LD.linux}
+
 PLATFORMS=windows linux darwin
 OS=$(word 1, $@)
 
